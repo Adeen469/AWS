@@ -5,14 +5,25 @@ import TripCard from '@/components/traveler/TripCard'
 import EmptyState from '@/components/traveler/EmptyState'
 
 // Mock data - will be replaced with actual API calls
-const getMockTrips = () => [
+const getMockTrips = (): Array<{
+  id: string
+  destination: string
+  start_date: string
+  end_date: string
+  duration_days: number
+  status: 'draft' | 'planned' | 'booked' | 'in_progress' | 'completed' | 'cancelled'
+  budget: number
+  estimated_cost: number
+  next_activity: string | null
+  alerts: number
+}> => [
   {
     id: '1',
     destination: 'Paris, France',
     start_date: '2026-11-15',
     end_date: '2026-11-22',
     duration_days: 7,
-    status: 'planned' as const,
+    status: 'planned',
     budget: 150000,
     estimated_cost: 145000,
     next_activity: 'Eiffel Tower Visit',
@@ -24,7 +35,7 @@ const getMockTrips = () => [
     start_date: '2026-12-01',
     end_date: '2026-12-10',
     duration_days: 9,
-    status: 'draft' as const,
+    status: 'draft',
     budget: 120000,
     estimated_cost: 0,
     next_activity: null,
