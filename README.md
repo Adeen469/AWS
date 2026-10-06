@@ -1,30 +1,56 @@
-# TourFlow AI backend
+# AWS - TourFlow
 
-FastAPI backend for the TourFlow AI hackathon project. The API verifies
-Supabase access tokens, enforces resource-level authorization, and uses
-PostgreSQL row-level security as defense in depth.
+This repository contains a FastAPI backend and two Next.js applications:
 
-## Run locally
+- **FastAPI backend** (`backend/`): authenticated API for travel planning and trip services.
+- **Operator dashboard** at the repository root (`src/`): tools for bookings, trips, disruptions, recovery, vendors, customers, and audit.
+- **Traveler application** in [`frontend/`](./frontend): traveler sign-in, trip planning, itineraries, bookings, budgeting, and trip assistance.
 
-1. Create and activate a Python 3.11+ virtual environment.
-2. Install `pip install -e ".[dev]"`.
-3. Copy `.env.example` to `.env`, configure Supabase and a PostgreSQL URL, and
-   apply the SQL migration in `supabase/migrations`.
-4. Start `uvicorn app.main:app --app-dir backend --reload`.
+## Run the backend
 
-The default SQLite database is intended only for local development and tests.
-Schema auto-creation applies only to SQLite. PostgreSQL deployments must apply
-the checked-in migration; never enable a service-role credential for client use.
-Configure `TOURFLOW_CORS_ORIGINS` as a comma-separated allowlist. AI routes
-return an explicit `AI_PROVIDER_ERROR` until the server-side AI provider
-settings are configured.
+Create and activate a Python 3.11+ virtual environment, then from the repository root:
 
-Interactive API documentation is available at `/docs`; the stable contract
-summary is in [`api/openapi.yaml`](api/openapi.yaml).
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+Copy-Item .env.example .env
+uvicorn app.main:app --app-dir backend --reload
+```
+
+Configure Supabase and PostgreSQL settings in `.env` and apply the SQL migration in `supabase/migrations`. The default SQLite database is intended only for local development and tests. PostgreSQL deployments must apply the checked-in migration. Configure `TOURFLOW_CORS_ORIGINS` as a comma-separated allowlist. AI routes return `AI_PROVIDER_ERROR` until server-side AI provider settings are configured.
+
+Interactive API documentation is available at [http://localhost:8000/docs](http://localhost:8000/docs); the API contract is in [`api/openapi.yaml`](./api/openapi.yaml).
+
+## Run the operator dashboard
+
+From the repository root:
+
+```powershell
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Configure the Supabase public environment variables required by the operator app before using authenticated features.
+
+## Run the traveler application
+
+From the repository root:
+
+```powershell
+npm --prefix frontend install
+npm --prefix frontend run dev
+```
+
+The traveler application runs at [http://localhost:3000](http://localhost:3000) when started separately. Configure the Supabase public environment variables required by this app before using authenticated features.
 
 ## Checks
 
 ```powershell
 pytest
 ruff check backend
+npm run build
+npm --prefix frontend run build
 ```
+
+Keep local environment files out of version control.
