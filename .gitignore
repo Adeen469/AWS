@@ -40,3 +40,12 @@ next-env.d.ts
 
 # Claude settings (may contain API keys)
 .claude/settings.local.json
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+*.egg-info/
+tourflow.db

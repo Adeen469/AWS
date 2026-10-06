@@ -1,0 +1,337 @@
+openapi: 3.1.0
+info:
+  title: TourFlow AI API
+  version: 0.1.0
+  description: >
+    Backend API contract. All /api/v1 endpoints require a Supabase access token
+    unless otherwise noted. Currency values are ISO 4217 codes and monetary
+    amounts are decimal strings.
+servers:
+  - url: http://localhost:8000
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      security: []
+      responses:
+        "200":
+          description: Service health
+  /api/v1/trips:
+    post:
+      summary: Create a trip for the authenticated traveler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripCreate"
+      responses:
+        "201":
+          description: Created trip
+        "401":
+          $ref: "#/components/responses/Error"
+    get:
+      summary: List trips visible to the authenticated actor
+      responses:
+        "200":
+          description: Authorized trips
+  /api/v1/trips/{trip_id}:
+    parameters:
+      - $ref: "#/components/parameters/TripId"
+    get:
+      summary: Get an authorized trip
+      responses:
+        "200":
+          description: Trip
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    patch:
+      summary: Update a trip and increment its version
+      responses:
+        "200":
+          description: Updated trip
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/v1/trips/{trip_id}/preferences:
+    put:
+      summary: Create or replace trip preferences
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Saved preferences
+  /api/v1/trips/{trip_id}/itinerary:
+    get:
+      summary: Get ordered itinerary
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Itinerary items
+  /api/v1/trips/{trip_id}/itinerary/items:
+    post:
+      summary: Add an itinerary item and its dependency edges
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "201":
+          description: Created item
+  /api/v1/trips/{trip_id}/itinerary/items/{item_id}:
+    parameters:
+      - $ref: "#/components/parameters/TripId"
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      summary: Edit a planned itinerary item
+      responses:
+        "200":
+          description: Updated itinerary item
+        "409":
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete an editable itinerary item
+      responses:
+        "204":
+          description: Deleted item
+  /api/v1/trips/{trip_id}/itinerary/validate:
+    post:
+      summary: Deterministically validate itinerary dependency buffers
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Validation result
+  /api/v1/trips/{trip_id}/price-summary:
+    get:
+      summary: Recalculate estimated and confirmed totals
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Price summary
+  /api/v1/trips/{trip_id}/bookings/mock:
+    post:
+      summary: Confirm mock bookings for planned items
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "201":
+          description: Created mock bookings
+  /api/v1/trips/{trip_id}/bookings:
+    get:
+      summary: List trip bookings
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Trip bookings
+  /api/v1/bookings/{booking_id}/cancel:
+    post:
+      summary: Cancel a confirmed booking
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cancelled booking
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/v1/trips/{trip_id}/disruptions:
+    post:
+      summary: Record an operational disruption
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "201":
+          description: Recorded disruption
+        "403":
+          $ref: "#/components/responses/Error"
+  /api/v1/trips/{trip_id}/coordinator:
+    post:
+      summary: Assign a coordinator to a trip
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+        - name: coordinator_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Coordinator assigned
+        "403":
+          $ref: "#/components/responses/Error"
+  /api/v1/recovery-options/{option_id}:
+    get:
+      summary: Get a recovery option
+      parameters:
+        - name: option_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recovery option
+        "404":
+          $ref: "#/components/responses/Error"
+  /api/v1/disruptions/{disruption_id}/impact:
+    post:
+      summary: Calculate downstream itinerary impact
+      parameters:
+        - name: disruption_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deterministic impact report
+  /api/v1/disruptions/{disruption_id}/recovery-options:
+    post:
+      summary: Generate feasible deterministic recovery options
+      parameters:
+        - name: disruption_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Feasible options
+  /api/v1/recovery-options/{option_id}/select:
+    post:
+      summary: Revalidate and transactionally apply a recovery option
+      parameters:
+        - name: option_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: expected_trip_version
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Applied recovery
+        "409":
+          $ref: "#/components/responses/Error"
+  /api/v1/trips/{trip_id}/itinerary/generate:
+    post:
+      summary: Request a structured AI itinerary draft
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Validated itinerary draft
+        "503":
+          $ref: "#/components/responses/Error"
+  /api/v1/trips/{trip_id}/recommendations:
+    post:
+      summary: Request structured AI recommendations
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Recommendations
+  /api/v1/trips/{trip_id}/assistant:
+    post:
+      summary: Ask the trip assistant
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question:
+                  type: string
+                  maxLength: 2000
+      responses:
+        "200":
+          description: Assistant response
+  /api/v1/operator/dashboard:
+    get:
+      summary: Get operator dashboard metrics
+      responses:
+        "200":
+          description: Dashboard
+        "403":
+          $ref: "#/components/responses/Error"
+  /api/v1/operator/trips:
+    get:
+      summary: List trips assigned to the operator
+      responses:
+        "200":
+          description: Assigned trips
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    TripId:
+      name: trip_id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    TripCreate:
+      type: object
+      required: [title, start_date, end_date]
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        destination_summary:
+          type: string
+          maxLength: 500
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+        budget_amount:
+          type: [number, "null"]
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message, request_id, details]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            request_id:
+              type: string
+            details:
+              type: object
+  responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
