@@ -6,3 +6,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 tourflow.db
+node_modules
+.next/
+frontend/.next/
+next-env.d.ts
+frontend/next-env.d.ts
