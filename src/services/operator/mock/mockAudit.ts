@@ -1,0 +1,48 @@
+import type { AuditEvent } from '@/types/operator'
+
+export const mockAuditEvents: AuditEvent[] = [
+  {
+    id: 'aud-001',
+    timestamp: '2026-10-12T10:42:00',
+    operator: 'Priya Admin',
+    action: 'recovery_approved',
+    tripId: 'trip-1023',
+    tripRef: 'TRP-1023',
+    previousState: 'Emirates EK508 (Original Flight)',
+    newState: 'Emirates EK510 (Replacement Flight)',
+    reason: 'Flight Delay — 2 hours',
+  },
+  {
+    id: 'aud-002',
+    timestamp: '2026-10-12T08:50:00',
+    operator: 'System',
+    action: 'impact_analyzed',
+    tripId: 'trip-1023',
+    tripRef: 'TRP-1023',
+    previousState: 'Pending Analysis',
+    newState: 'Impact Analysis Complete — 4 services affected',
+    reason: 'Flight Delay disruption detected',
+  },
+  {
+    id: 'aud-003',
+    timestamp: '2026-10-12T08:30:00',
+    operator: 'System',
+    action: 'disruption_created',
+    tripId: 'trip-1023',
+    tripRef: 'TRP-1023',
+    previousState: 'No Disruptions',
+    newState: 'Flight Delay — HIGH severity',
+    reason: 'EK508 delayed by 2 hours',
+  },
+  {
+    id: 'aud-004',
+    timestamp: '2026-10-12T10:45:00',
+    operator: 'System',
+    action: 'traveler_notified',
+    tripId: 'trip-1023',
+    tripRef: 'TRP-1023',
+    previousState: 'Not Notified',
+    newState: 'Traveler Notified via App + SMS',
+    reason: 'Recovery approved by operator',
+  },
+]
