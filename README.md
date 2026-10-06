@@ -1,4 +1,4 @@
-# AWS — TourFlow
+# AWS - TourFlow
 
 This repository contains two Next.js applications:
 
